@@ -4,65 +4,41 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Tetris</title>
-<link rel="stylesheet" href="style.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="landing.css">
 </head>
 <body>
-  <div class="game-container">
-    <h1>Tetris</h1>
-
-    <div class="game-area">
-      <div class="board-wrapper">
-        <canvas id="board" width="300" height="600"></canvas>
-        <div id="game-over-overlay" class="hidden">
-          <p>Game Over</p>
-          <button id="restart-btn">다시 시작</button>
-        </div>
-      </div>
-
-      <div class="side-panel">
-        <div class="panel-box">
-          <h2>Score</h2>
-          <p id="score">0</p>
-        </div>
-
-        <div class="panel-box">
-          <h2>Level</h2>
-          <p id="level">1</p>
-        </div>
-
-        <div class="panel-box">
-          <h2>Next</h2>
-          <canvas id="next-board" width="100" height="60"></canvas>
-        </div>
-
-        <div class="panel-box">
-          <h2>전체 최고점수</h2>
-          <p id="high-score">-</p>
-        </div>
-
-        <div class="panel-box keyboard-help">
-          <h2>조작 방법</h2>
-          <ul class="controls">
-            <li><span class="key">← →</span> : 좌우 이동</li>
-            <li><span class="key">↓</span> : 소프트 드롭</li>
-            <li><span class="key">↑</span> : 회전</li>
-            <li><span class="key">Space</span> : 하드 드롭</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-
-    <div id="touch-controls" class="touch-controls">
-      <div class="touch-dpad">
-        <button id="btn-rotate" class="touch-btn dpad-up" aria-label="회전" type="button">↑</button>
-        <button id="btn-left" class="touch-btn dpad-left" aria-label="왼쪽 이동" type="button">←</button>
-        <button id="btn-down" class="touch-btn dpad-down" aria-label="소프트 드롭" type="button">↓</button>
-        <button id="btn-right" class="touch-btn dpad-right" aria-label="오른쪽 이동" type="button">→</button>
-      </div>
-      <button id="btn-drop" class="touch-btn wide" aria-label="하드 드롭" type="button">DROP (Space)</button>
-    </div>
+  <div class="bg-shapes" aria-hidden="true">
+    <span class="shape shape-1"></span>
+    <span class="shape shape-2"></span>
+    <span class="shape shape-3"></span>
+    <span class="shape shape-4"></span>
+    <span class="shape shape-5"></span>
+    <span class="shape shape-6"></span>
+    <span class="shape shape-7"></span>
+    <span class="shape shape-8"></span>
   </div>
 
-  <script src="script.js"></script>
+  <main class="hero">
+    <div class="logo-plaque">
+      <div class="logo-top">
+        <h1 class="tetris-logo">
+          <span class="l1">T</span><span class="l2">E</span><span class="l3">T</span><span class="l4">R</span><span class="l5">I</span><span class="l6">S</span>
+        </h1>
+      </div>
+    </div>
+
+    <p class="tagline">브라우저에서 바로 즐기는 클래식 테트리스</p>
+
+    <a class="play-btn" href="game.html">PLAY</a>
+
+    <ul class="feature-list">
+      <li>키보드 · 터치 조작 지원</li>
+      <li>레벨업에 따라 빨라지는 속도</li>
+      <li>다음 블록 미리보기 &amp; 최고점수 기록</li>
+    </ul>
+  </main>
 </body>
 </html>

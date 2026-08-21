@@ -355,3 +355,92 @@ zomm 기능도 막아줘 터치하면 화면이 확대됨
 
 - `index.html`의 터치 d-pad 아이콘을 삼각형 문자(◀ ▶ ▽)에서 조작 방법 목록과 동일한 화살표 문자(← → ↓)로 교체 (회전 `↑`은 이전 변경에서 이미 화살표였음)
 - 기능/`id`는 변경 없음, `README.md` 조작 방법 표의 터치 버튼 열도 동일하게 갱신
+
+---
+
+## 20. 조작키가 안 보이는 문제 (pointer:coarse 매칭 실패 대응)
+
+### 프롬프트 (원본)
+
+```
+조작키 영역이 테스트리 게임플레이 영역을 침범함
+```
+```
+https://jangwonbok.github.io/tetris/ 확인해보면 조작키 자체가 안보임
+```
+
+### 결과 (요약)
+
+- 배포된 `jangwonbok/tetris`의 `index.html`/`script.js`를 직접 curl로 받아 로컬 소스와 diff — 완전히 동일하고 `x-cache: MISS`로 캐시가 아닌 최신 응답임을 확인 (침범 문제는 강력 새로고침 안 한 상태에서의 구버전 잔상으로 추정, 조작키 자체가 안 보이는 문제는 실제 코드 상 원인이 있다고 판단)
+- 원인 추정: 터치 조작키 표시가 전적으로 `@media (pointer: coarse)`에만 의존하고 있었는데, 일부 기기/브라우저 조합(트랙패드가 연결된 태블릿, pointer 감지가 기대와 다르게 동작하는 브라우저 등)에서는 실제 터치 기기인데도 `pointer: coarse`가 매칭되지 않아 터치 버튼이 계속 `display:none` 상태로 남아있을 수 있음
+- `style.css`의 `@media (pointer: coarse)` → `@media (pointer: coarse), (max-width: 700px)`로 변경해, pointer 감지가 실패하더라도 화면 폭이 좁으면(스마트폰 화면 크기) 터치 레이아웃이 적용되도록 안전장치 추가
+- `script.js`의 `window.matchMedia('(pointer: coarse)')`도 동일한 조건(`'(pointer: coarse), (max-width: 700px)'`)으로 맞춰, 보드 크기 계산(`fitBoardToViewport`)과 CSS 레이아웃 전환 기준이 어긋나지 않도록 함
+
+---
+
+## 21. 머티리얼 디자인 적용
+
+### 프롬프트 (원본)
+
+```
+머티리얼 디자인 반영해줘
+```
+
+### 결과 (요약)
+
+- 레이아웃/반응형 구조(폭, flex, grid, 모바일 브레이크포인트 등)는 전혀 건드리지 않고, 색상·타이포그래피·모양(shape)만 머티리얼 디자인 톤으로 교체
+- `index.html` — Google Fonts에서 Roboto(400/500/700) 로드하는 `<link>` 추가
+- `style.css` — `:root`에 머티리얼 다크 테마 팔레트를 CSS 변수로 정의: `--md-primary`(#6200ee), `--md-secondary`(#03dac6, 점수/레벨 강조색), `--md-background`(#121212)/`--md-surface`(#1e1e1e, 머티리얼 표준 다크 서피스), `--md-error`(#cf6679), elevation 그림자 3단계(`--md-elevation-1/2/4`)
+- 카드(`.panel-box`)에 elevation 그림자와 더 둥근 모서리(12px) 적용, 라벨(`h2`)은 대문자+자간(오버라인 스타일)
+- 보드(`#board`)는 두꺼운 테두리 대신 elevation 그림자로 "떠 있는 서피스" 느낌 적용
+- 버튼: 방향 터치 버튼(`.touch-btn`)을 FAB 스타일 원형(`border-radius:50%`)으로, DROP 버튼과 재시작 버튼은 필(pill) 형태(`border-radius:24px`)의 Contained Button 스타일로, 눌렀을 때(`:active`) elevation이 낮아지는 눌림 효과 추가
+- `.key` 배지를 머티리얼 칩(chip) 스타일(완전 둥근 pill, 반투명 배경)로 변경
+- Game Over 텍스트는 머티리얼 error 색상 + 대문자로 변경
+- `README.md`에 머티리얼 디자인 적용 사실 명시
+
+---
+
+## 22. 테트리스 랜딩 페이지 추가
+
+### 프롬프트 (원본)
+
+```
+(첨부 이미지: 파란 배경에 떠다니는 큐브 모양과 T-테트로미노 모양 판에
+ 무지개색 "TETRIS" 로고가 있는 스크린샷)
+첨부된 이미지 참고해서 테트리스 랜딩페이지 만들어줘
+```
+
+### 결과 (요약)
+
+- 기존 게임 화면이었던 `index.html`을 `game.html`로 이름 변경(`git mv`로 히스토리 보존), `style.css`/`script.js` 참조는 상대 경로라 수정 없이 그대로 유지됨
+- 새 `index.html`을 랜딩 페이지로 작성 — GitHub Pages 진입점이 되어, PLAY 버튼 클릭 시 `game.html`로 이동
+- `landing.css` 신규 작성:
+  - 파란색 그라디언트 배경 + 은은하게 떠다니는(`@keyframes drift`) 반투명 사각형들로 첨부 이미지의 큐브 느낌 재현 (`prefers-reduced-motion`이면 애니메이션 정지)
+  - "TETRIS" 로고를 담는 판을 `clip-path`로 실제 **T-테트로미노 실루엣**(3칸 너비 상단 바 + 중앙 1칸 하단 stem)으로 잘라내어 이미지의 특징적인 판 모양을 그대로 구현
+  - 각 글자를 개별 `<span>`으로 감싸 이미지처럼 글자마다 다른 색(빨강/주황/노랑/초록/파랑/분홍)을 지정
+  - 흰색 필(pill) 모양 PLAY 버튼, 태그라인, 간단한 기능 소개 목록 추가
+- `game.html`에 랜딩 페이지로 돌아가는 `← Home` 링크 추가, `style.css`에 `.back-link` 스타일(모바일 전용 축소 규칙 포함, 기존 "한 화면에 꽉 맞추기" 레이아웃 예산이 깨지지 않도록 처리)
+- `README.md`의 파일 구성/실행 방법을 index.html(랜딩)·game.html(게임) 구조에 맞게 갱신, `DEPLOY.md`의 배포 확인 체크리스트에 랜딩 페이지 확인 항목 추가
+
+---
+
+## 23. 터치 조작키를 반투명 플로팅 버튼으로 변경
+
+### 프롬프트 (원본)
+
+```
+(첨부 이미지: 모바일 퍼즐 게임 화면 위에 반투명한 회전/방향 버튼이
+ 게임판에 겹쳐 떠 있는 조작 UI 스크린샷)
+조작키 첨부된 이미지와 동일하게 만들어줘
+투명도있는 버튼에 플로팅 되어있는 형태로
+```
+
+### 결과 (요약)
+
+- 방향키 배치(키보드 화살표와 동일한 위/좌/아래/우 십자 배열)는 이전에 확정한 대로 유지하고, 핵심 요청인 "투명도 있는 버튼 + 플로팅"에 집중해 스타일과 배치 방식을 변경
+- `game.html` — `#touch-controls`를 기존에는 `.game-area` 옆의 별도 행(자체 공간 차지)이었던 것을 **`.board-wrapper` 내부로 이동**시켜, 게임오버 오버레이와 같은 방식으로 보드 위에 겹쳐지는 구조로 변경 (중복 id 제거)
+- `style.css`:
+  - `.touch-controls`를 화면 하단에 고정된 불투명 바(`position:fixed`, 배경색, 상단 테두리)에서, `board-wrapper` 기준 `position:absolute; bottom`으로 **보드 위에 뜨는 오버레이**로 변경 — 더 이상 별도 세로 공간을 차지하지 않아 보드가 쓸 수 있는 높이가 늘어남
+  - `.touch-btn`을 반투명 유리 느낌으로 변경: `background: rgba(255,255,255,0.16)`, `backdrop-filter: blur(6px)`, 얇은 반투명 테두리 — 보드가 버튼 너머로 비쳐 보이는 "플로팅 글래스" 스타일
+  - 버튼 사이 빈 공간은 `pointer-events:none`/버튼만 `pointer-events:auto`로 처리해 클릭이 버튼에만 반응하도록 함
+- 헤드리스 테스트로 버튼 5개가 정확히 1개씩만 존재(중복 id 없음)하고 `board-wrapper` 내부에 위치하며, 클릭 시 예외 없이 동작함을 확인

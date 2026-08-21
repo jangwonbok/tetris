@@ -62,7 +62,8 @@ git subtree push --prefix=src/exercise/jangwonbok/day02/tetris tetris main
 https://jangwonbok.github.io/tetris/
 ```
 
-- 게임 화면(보드, Score, Level)이 정상적으로 로드되는지
+- 랜딩 페이지(TETRIS 로고, PLAY 버튼)가 정상적으로 로드되는지
+- PLAY 버튼 클릭 시 `game.html`로 이동하고, 게임 화면(보드, Score, Level)이 정상적으로 로드되는지
 - 키보드 조작(← → 이동, ↓ 소프트 드롭, ↑ 회전, Space 하드 드롭)이 동작하는지
 - 30초마다 레벨이 오르고 속도가 빨라지는지
 

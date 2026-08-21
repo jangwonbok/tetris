@@ -14,7 +14,7 @@
   const nextCtx = nextCanvas.getContext('2d');
   const NEXT_CELL = 20;
   const boardWrapper = document.querySelector('.board-wrapper');
-  const touchLayoutQuery = window.matchMedia('(pointer: coarse)');
+  const touchLayoutQuery = window.matchMedia('(pointer: coarse), (max-width: 700px)');
 
   // On touch layouts the board must fit exactly within whatever space is
   // left after the header/score bar/touch buttons, and CSS alone can't size

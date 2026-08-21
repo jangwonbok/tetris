@@ -1,15 +1,18 @@
 # Tetris
 
 브라우저에서 바로 실행할 수 있는 간단한 테트리스 게임입니다.
-`HTML`, `CSS`, `Vanilla JavaScript`만 사용해 구현했습니다.
+`HTML`, `CSS`, `Vanilla JavaScript`만 사용해 구현했으며, 다크 테마의 머티리얼 디자인(Material Design)을 적용했습니다 (Roboto 폰트, elevation 그림자, 카드형 패널, FAB 스타일 원형 방향 버튼).
 
 ## 파일 구성
 
-- `index.html`
-  게임 보드(canvas), 점수 표시, 조작 안내, 게임오버 화면 구조를 정의합니다.
+- `index.html` / `landing.css`
+  랜딩 페이지(로고, PLAY 버튼)를 정의합니다. GitHub Pages 진입점이며, PLAY 클릭 시 `game.html`로 이동합니다.
+
+- `game.html`
+  실제 게임 화면 — 보드(canvas), 점수/레벨/Next/최고점수 패널, 조작 안내, 게임오버 화면 구조를 정의합니다.
 
 - `style.css`
-  레이아웃, 색상, 게임오버 오버레이 스타일을 담당합니다.
+  `game.html` 전용 레이아웃, 색상, 게임오버 오버레이 스타일을 담당합니다.
 
 - `script.js`
   테트로미노 생성·이동·회전·충돌 판정, 줄 제거, 점수 계산, 게임오버·재시작 로직을 처리합니다.
@@ -43,7 +46,7 @@
 
 ### 1) 파일 직접 열기
 
-- `index.html` 파일을 브라우저에서 직접 열어 확인할 수 있습니다.
+- `index.html`(랜딩 페이지) 파일을 브라우저에서 직접 열어 확인할 수 있습니다. PLAY 버튼을 누르면 `game.html`로 이동합니다.
 
 ### 2) 로컬 서버 실행 (권장)
 
