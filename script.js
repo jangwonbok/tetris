@@ -9,6 +9,26 @@
   const levelEl = document.getElementById('level');
   const overlay = document.getElementById('game-over-overlay');
   const restartBtn = document.getElementById('restart-btn');
+  const boardWrapper = document.querySelector('.board-wrapper');
+  const touchLayoutQuery = window.matchMedia('(pointer: coarse)');
+
+  // On touch layouts the board must fit exactly within whatever space is
+  // left after the header/score bar/touch buttons, and CSS alone can't size
+  // it reliably (board-wrapper's own box depends on the canvas, so aspect-
+  // ratio + max-width create a circular reference) — measure directly instead.
+  function fitBoardToViewport() {
+    if (!touchLayoutQuery.matches) {
+      canvas.style.width = '';
+      canvas.style.height = '';
+      return;
+    }
+    const availW = boardWrapper.clientWidth;
+    const availH = boardWrapper.clientHeight;
+    if (availW <= 0 || availH <= 0) return;
+    const size = Math.min(availW, availH / 2);
+    canvas.style.width = `${size}px`;
+    canvas.style.height = `${size * 2}px`;
+  }
 
   const COLORS = {
     I: '#00e0e0',
@@ -295,5 +315,9 @@
   document.addEventListener('keydown', handleKeydown);
   restartBtn.addEventListener('click', startGame);
 
+  window.addEventListener('resize', fitBoardToViewport);
+  window.addEventListener('orientationchange', fitBoardToViewport);
+
+  fitBoardToViewport();
   startGame();
 })();

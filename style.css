@@ -239,16 +239,16 @@ h1 {
   .board-wrapper {
     flex: 1;
     min-height: 0;
-    width: auto;
+    width: 100%;
     display: flex;
+    align-items: center;
     justify-content: center;
   }
 
-  #board {
-    height: 100%;
-    width: auto;
-    max-width: 100%;
-  }
+  /* actual pixel size is set by script.js (fitBoardToViewport), which
+     measures .board-wrapper directly — CSS aspect-ratio sizing here is
+     unreliable because board-wrapper's own box also depends on the
+     canvas's size, so the two can't safely be resolved by CSS alone */
 
   .touch-controls {
     display: flex;

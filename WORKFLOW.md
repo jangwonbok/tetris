@@ -224,3 +224,24 @@ zomm 기능도 막아줘 터치하면 화면이 확대됨
 - `#board`를 `height:100%; width:auto; max-width:100%`로 바꿔, 폭이 아니라 **남은 높이를 기준으로** 가로:세로 1:2 비율에 맞게 크기가 계산되도록 함 — 세로로 긴 캔버스가 화면 높이를 넘기지 않도록 하는 핵심 수정
 - 터치 버튼을 더 이상 `position: fixed`로 띄우지 않고 flex 컬럼의 마지막 항목으로 배치해, 별도의 `body` 하단 여백 계산(`padding-bottom`)이 필요 없어짐
 - 만약을 위해 `overflow-y: auto`는 유지해 계산이 어긋나는 기기에서도 클리핑 대신 스크롤로 안전하게 대응
+
+---
+
+## 13. 게임 화면 잘림 수정 (JS 기반 정밀 크기 계산)
+
+### 프롬프트 (원본)
+
+```
+게임화면이 잘려보여
+테트리스 게임화면이 안잘리게 만들어주고
+게임화면 + 조작키화면이 한 화면에 보이도록
+```
+
+### 결과 (요약)
+
+- 원인 분석: `.board-wrapper`가 `width: auto`(내용에 맞춰 크기 결정)인 상태에서 캔버스에 `max-width: 100%`를 걸었는데, 기준이 되는 `.board-wrapper`의 폭 자체가 캔버스 크기에 의존하는 순환 참조 구조라 브라우저가 `max-width` 퍼센트값을 사실상 무시함 → 캔버스가 화면 폭을 넘어서도 그대로 렌더링되어 오른쪽이 잘려 보이는 문제였음
+- CSS만으로는 이 순환 참조를 안전하게 풀기 어려워, `script.js`에 `fitBoardToViewport()` 함수를 추가해 `.board-wrapper`의 실제 렌더링된 폭/높이를 직접 측정(`clientWidth`/`clientHeight`) 후, `Math.min(가용폭, 가용높이/2)`로 1:2 비율을 유지하면서 두 방향 모두에 확실히 들어맞는 크기를 계산해 캔버스에 인라인 `style.width`/`style.height`로 적용
+- `pointer: coarse`(터치 기기)에서만 적용되고, 데스크톱(`pointer: fine`)에서는 인라인 스타일을 비워 기존 CSS 기반 크기 조정을 그대로 사용
+- `window`의 `resize`/`orientationchange` 이벤트에서 재계산하도록 연결, 페이지 로드 시 최초 1회도 실행
+- `style.css`의 `.board-wrapper`/`#board` 관련 모바일 규칙을 단순화(폭 100%로 고정, 캔버스 크기는 JS가 전담)하고, 순환 참조를 유발하던 `aspect-ratio`/`max-width` 조합 제거
+- jsdom 기반 스모크 테스트로 `matchMedia` 사용 코드가 예외 없이 로드됨을 확인
