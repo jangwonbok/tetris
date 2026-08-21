@@ -77,6 +77,7 @@
   const SPEED_STEP_PER_LEVEL = 70;
   const LEVEL_UP_INTERVAL = 30000;
   const HIGH_SCORE_KEY = 'tetris-high-score';
+  const LINE_CLEAR_ANIM_DURATION = 250;
   const MUTED_KEY = 'tetris-muted';
   const BGM_VOLUME = 0.25;
   // simple original 8-bit-style loop (no external audio file/network request
@@ -103,6 +104,8 @@
   let lastTime = 0;
   let gameOver = false;
   let rafId = null;
+  let clearingRows = [];
+  let clearAnimElapsed = 0;
   let muted = loadMuted();
   let audioCtx = null;
   let masterGain = null;
@@ -276,21 +279,45 @@
     });
   }
 
-  function clearLines() {
-    let cleared = 0;
-    for (let y = ROWS - 1; y >= 0; y--) {
-      if (board[y].every((cell) => cell !== null)) {
-        board.splice(y, 1);
-        board.unshift(Array(COLS).fill(null));
-        cleared++;
-        y++;
-      }
+  function findCompletedRows() {
+    const rows = [];
+    for (let y = 0; y < ROWS; y++) {
+      if (board[y].every((cell) => cell !== null)) rows.push(y);
     }
-    if (cleared > 0) {
-      score += cleared * 100;
-      scoreEl.textContent = score;
-      maybeUpdateHighScore();
+    return rows;
+  }
+
+  // Locking a piece either finds no complete rows (spawn immediately) or
+  // some (freeze the board — current becomes null — for a brief flash/fade
+  // animation; the actual removal + score + next spawn happen afterward in
+  // finishLineClear(), once loop() sees the animation timer run out).
+  function lockAndAdvance() {
+    lockPiece(current);
+    const completed = findCompletedRows();
+    if (completed.length > 0) {
+      clearingRows = completed;
+      clearAnimElapsed = 0;
+      current = null;
+    } else {
+      spawnPiece();
     }
+  }
+
+  function finishLineClear() {
+    // remove bottom-most first so earlier splices don't shift the indices
+    // of rows still waiting to be removed
+    const rowsToRemove = [...clearingRows].sort((a, b) => b - a);
+    rowsToRemove.forEach((y) => {
+      board.splice(y, 1);
+      board.unshift(Array(COLS).fill(null));
+    });
+    clearingRows = [];
+
+    score += rowsToRemove.length * 100;
+    scoreEl.textContent = score;
+    maybeUpdateHighScore();
+
+    spawnPiece();
   }
 
   function spawnPiece() {
@@ -325,7 +352,7 @@
   }
 
   function tryMove(dx, dy) {
-    if (gameOver) return false;
+    if (gameOver || !current) return false;
     const moved = { ...current, x: current.x + dx, y: current.y + dy };
     if (isValidPosition(moved)) {
       current = moved;
@@ -335,7 +362,7 @@
   }
 
   function tryRotate(direction = 1) {
-    if (gameOver) return;
+    if (gameOver || !current) return;
     const rotated = rotatePiece(current, direction);
     const attempt = { ...rotated, x: current.x, y: current.y };
     if (isValidPosition(attempt)) {
@@ -344,22 +371,19 @@
   }
 
   function softDrop() {
+    if (!current) return;
     if (!tryMove(0, 1)) {
-      lockPiece(current);
-      clearLines();
-      spawnPiece();
+      lockAndAdvance();
     }
     dropTimer = 0;
   }
 
   function hardDrop() {
-    if (gameOver) return;
+    if (gameOver || !current) return;
     while (tryMove(0, 1)) {
       // fall until blocked
     }
-    lockPiece(current);
-    clearLines();
-    spawnPiece();
+    lockAndAdvance();
     dropTimer = 0;
   }
 
@@ -372,6 +396,25 @@
     ctx.strokeStyle = color;
     ctx.lineWidth = 2;
     ctx.strokeRect(x * CELL + 1, y * CELL + 1, CELL - 3, CELL - 3);
+  }
+
+  // brief flash-then-fade for a row that's about to be cleared: a white
+  // overlay that's brightest at the start, while the whole row fades out
+  // over the same short window, so it reads as "flash, then vanish"
+  function drawClearingRow(y) {
+    const progress = Math.min(clearAnimElapsed / LINE_CLEAR_ANIM_DURATION, 1);
+    const fadeAlpha = 1 - progress;
+    const flashAlpha = fadeAlpha * 0.85;
+    for (let x = 0; x < COLS; x++) {
+      const type = board[y][x];
+      if (!type) continue;
+      ctx.globalAlpha = fadeAlpha;
+      drawCell(x, y, COLORS[type]);
+      ctx.globalAlpha = flashAlpha;
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(x * CELL, y * CELL, CELL - 1, CELL - 1);
+    }
+    ctx.globalAlpha = 1;
   }
 
   // where the current piece would land if hard-dropped right now — found by
@@ -390,6 +433,10 @@
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     for (let y = 0; y < ROWS; y++) {
+      if (clearingRows.includes(y)) {
+        drawClearingRow(y);
+        continue;
+      }
       for (let x = 0; x < COLS; x++) {
         const cell = board[y][x];
         if (cell) drawCell(x, y, COLORS[cell]);
@@ -414,16 +461,23 @@
     const delta = timestamp - lastTime;
     lastTime = timestamp;
 
-    dropTimer += delta;
-    if (dropTimer >= currentDropInterval()) {
-      softDrop();
-    }
+    if (clearingRows.length > 0) {
+      clearAnimElapsed += delta;
+      if (clearAnimElapsed >= LINE_CLEAR_ANIM_DURATION) {
+        finishLineClear();
+      }
+    } else {
+      dropTimer += delta;
+      if (dropTimer >= currentDropInterval()) {
+        softDrop();
+      }
 
-    levelTimer += delta;
-    if (levelTimer >= LEVEL_UP_INTERVAL) {
-      levelTimer -= LEVEL_UP_INTERVAL;
-      level++;
-      levelEl.textContent = level;
+      levelTimer += delta;
+      if (levelTimer >= LEVEL_UP_INTERVAL) {
+        levelTimer -= LEVEL_UP_INTERVAL;
+        level++;
+        levelEl.textContent = level;
+      }
     }
 
     render();
@@ -469,6 +523,8 @@
     dropTimer = 0;
     levelTimer = 0;
     lastTime = 0;
+    clearingRows = [];
+    clearAnimElapsed = 0;
     overlay.classList.add('hidden');
     spawnPiece();
     render();
