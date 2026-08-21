@@ -229,11 +229,12 @@ h1 {
 
 /* full cross (up/left/right/down around a hub) — up mirrors the
    standalone DROP button (also hard drop) so the d-pad still reads as
-   a complete cross like the reference image */
+   a complete cross like the reference image. Track size uses clamp()
+   so the whole cross shrinks on narrow phones instead of overflowing. */
 .touch-dpad {
   display: grid;
-  grid-template-columns: repeat(3, 56px);
-  grid-template-rows: repeat(3, 56px);
+  grid-template-columns: repeat(3, clamp(34px, 10vw, 56px));
+  grid-template-rows: repeat(3, clamp(34px, 10vw, 56px));
   gap: 4px;
 }
 
@@ -298,28 +299,32 @@ h1 {
 
 .touch-btn.round {
   /* rotate buttons: equal width/height so border-radius:50% forms a
-     true circle, with room around the icon so it doesn't crowd the edge */
-  width: 58px;
-  height: 58px;
-  font-size: 26px;
+     true circle. Sized with clamp() (viewport-scaled, not a fixed px)
+     so this pair plus the DROP button plus the d-pad can never add up
+     to more than the screen is wide — a fixed-px combined width used to
+     overflow narrow phones and push the page into horizontal scroll. */
+  width: clamp(40px, 12vw, 58px);
+  height: clamp(40px, 12vw, 58px);
+  font-size: clamp(18px, 5.5vw, 26px);
 }
 
 .touch-btn.drop-btn {
   /* standalone hard-drop button: a pill (not a circle, since "DROP"
      is wider than a single icon) with real breathing room around the text */
-  width: 76px;
-  height: 52px;
-  padding: 0 10px;
-  border-radius: 26px;
-  font-size: 12px;
+  width: clamp(48px, 14vw, 76px);
+  height: clamp(40px, 10vw, 52px);
+  padding: 0 8px;
+  border-radius: 999px;
+  font-size: clamp(10px, 3vw, 12px);
   font-weight: 700;
   letter-spacing: 0.5px;
 }
 
 .touch-btn.square {
   /* d-pad direction buttons: rounded square instead of a full circle;
-     grid gives these their 56x56 box, so only shape/font need setting */
-  font-size: 20px;
+     the grid track (clamp-sized above) gives these their box, so only
+     shape/font need setting here */
+  font-size: clamp(15px, 4.5vw, 20px);
   border-radius: 12px;
 }
 
