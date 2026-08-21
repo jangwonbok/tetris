@@ -1,5 +1,8 @@
 * {
   box-sizing: border-box;
+  /* blocks double-tap-to-zoom; touch-action isn't inherited by the CSS
+     cascade, so it must be set on every element, not just html/body */
+  touch-action: manipulation;
 }
 
 html,

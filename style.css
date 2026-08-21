@@ -17,7 +17,10 @@
   box-sizing: border-box;
 }
 
-html {
+/* blocks double-tap-to-zoom everywhere. touch-action isn't inherited by
+   the CSS cascade, so setting it only on <html> left any other element a
+   tap could land on (the background, panels, etc.) still zoomable. */
+* {
   touch-action: manipulation;
 }
 

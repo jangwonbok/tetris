@@ -78,7 +78,7 @@
   const LEVEL_UP_INTERVAL = 30000;
   const HIGH_SCORE_KEY = 'tetris-high-score';
   const MUTED_KEY = 'tetris-muted';
-  const BGM_VOLUME = 0.15;
+  const BGM_VOLUME = 0.25;
   // simple original 8-bit-style loop (no external audio file/network request
   // needed — synthesized entirely with the Web Audio API)
   const BGM_NOTES = [
@@ -176,9 +176,12 @@
   }
 
   function startBgm() {
-    if (bgmTimerId) return;
+    // always run first: if the context ended up suspended after the very
+    // first attempt (browsers vary on which gesture "counts"), later calls
+    // returning early below would otherwise never retry resume() again
     ensureAudioContext();
     if (!audioCtx) return;
+    if (bgmTimerId) return;
     nextNoteIndex = 0;
     nextNoteTime = audioCtx.currentTime + 0.1;
     scheduleBgmNotes();
@@ -365,6 +368,23 @@
     ctx.fillRect(x * CELL, y * CELL, CELL - 1, CELL - 1);
   }
 
+  function drawGhostCell(x, y, color) {
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    ctx.strokeRect(x * CELL + 1, y * CELL + 1, CELL - 3, CELL - 3);
+  }
+
+  // where the current piece would land if hard-dropped right now — found by
+  // walking a copy straight down until it can no longer move, same as
+  // hardDrop()'s loop but without touching the real piece or the board
+  function getGhostPiece() {
+    let ghost = current;
+    while (isValidPosition({ ...ghost, y: ghost.y + 1 })) {
+      ghost = { ...ghost, y: ghost.y + 1 };
+    }
+    return ghost;
+  }
+
   function render() {
     ctx.fillStyle = '#0f0f1a';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -377,6 +397,11 @@
     }
 
     if (current) {
+      const ghost = getGhostPiece();
+      getCellPositions(ghost).forEach(({ x, y }) => {
+        if (y >= 0) drawGhostCell(x, y, COLORS[current.type]);
+      });
+
       getCellPositions(current).forEach(({ x, y }) => {
         if (y >= 0) drawCell(x, y, COLORS[current.type]);
       });
@@ -487,17 +512,18 @@
     setMuted(!muted);
   });
 
-  // autoplay is blocked until a real user gesture — start BGM on the first
-  // one (keyboard, click, or touch) and then stop listening
-  function startBgmOnFirstInteraction() {
+  // Autoplay is blocked until a real user gesture, and browsers vary on
+  // which gesture type actually counts — so instead of a one-shot listener,
+  // keep trying on every interaction. startBgm() is idempotent (it only
+  // creates the AudioContext once and only starts the scheduler once), so
+  // this is cheap and also re-resumes playback if the context ever gets
+  // auto-suspended (e.g. after backgrounding the tab).
+  function tryStartBgm() {
     if (!muted) startBgm();
-    document.removeEventListener('keydown', startBgmOnFirstInteraction);
-    document.removeEventListener('click', startBgmOnFirstInteraction);
-    document.removeEventListener('touchstart', startBgmOnFirstInteraction);
   }
-  document.addEventListener('keydown', startBgmOnFirstInteraction);
-  document.addEventListener('click', startBgmOnFirstInteraction);
-  document.addEventListener('touchstart', startBgmOnFirstInteraction);
+  ['keydown', 'click', 'touchstart', 'touchend'].forEach((type) => {
+    document.addEventListener(type, tryStartBgm);
+  });
 
   highScore = loadHighScore();
   renderHighScore();
