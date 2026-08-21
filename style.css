@@ -140,14 +140,36 @@ h1 {
   z-index: 10;
 }
 
-.touch-row {
-  display: flex;
-  gap: 10px;
-  justify-content: center;
+/* mirrors a physical keyboard's arrow-key cluster: rotate (↑) on top,
+   left/soft-drop(↓)/right on the bottom row */
+.touch-dpad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.dpad-up {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.dpad-left {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.dpad-down {
+  grid-column: 2;
+  grid-row: 2;
+}
+
+.dpad-right {
+  grid-column: 3;
+  grid-row: 2;
 }
 
 .touch-btn {
-  flex: 1;
   padding: 16px 0;
   font-size: 20px;
   border: none;
@@ -163,7 +185,7 @@ h1 {
 }
 
 .touch-btn.wide {
-  flex: 2;
+  width: 100%;
   font-size: 15px;
   font-weight: bold;
   letter-spacing: 1px;

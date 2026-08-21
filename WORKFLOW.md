@@ -245,3 +245,20 @@ zomm 기능도 막아줘 터치하면 화면이 확대됨
 - `window`의 `resize`/`orientationchange` 이벤트에서 재계산하도록 연결, 페이지 로드 시 최초 1회도 실행
 - `style.css`의 `.board-wrapper`/`#board` 관련 모바일 규칙을 단순화(폭 100%로 고정, 캔버스 크기는 JS가 전담)하고, 순환 참조를 유발하던 `aspect-ratio`/`max-width` 조합 제거
 - jsdom 기반 스모크 테스트로 `matchMedia` 사용 코드가 예외 없이 로드됨을 확인
+
+---
+
+## 14. 터치 조작키를 키보드 방향키 배치로 변경
+
+### 프롬프트 (원본)
+
+```
+키보드 방향키 위치랑 동일하게 조작키 만들어줘
+```
+
+### 결과 (요약)
+
+- `index.html` — 기존 2행 나열(◀⟳▶ / ▽ DROP) 구조를 물리 키보드 방향키 배치(역T자)로 변경: 회전(⟳, ArrowUp 대응)을 상단 중앙, 좌(◀)/소프트드롭(▽, ArrowDown 대응)/우(▶)를 하단 한 줄에 배치하는 `.touch-dpad` 컨테이너 도입
+- 하드 드롭(Space 대응) 버튼은 물리 키보드의 스페이스바처럼 방향키 클러스터 아래에 전체 폭으로 분리 배치, 라벨을 `DROP (Space)`로 명확화
+- `style.css` — `.touch-row`(flex) 방식을 제거하고 `.touch-dpad`를 3열×2행 CSS Grid로 구성, `grid-column`/`grid-row`로 각 버튼을 정확한 위치(위/왼쪽/아래/오른쪽)에 배치
+- 버튼 `id`는 그대로 유지(`btn-left`/`btn-right`/`btn-rotate`/`btn-down`/`btn-drop`)해 `script.js`는 수정 없이 그대로 동작
