@@ -30,13 +30,23 @@
           <p id="level">1</p>
         </div>
 
+        <div class="panel-box">
+          <h2>Next</h2>
+          <canvas id="next-board" width="100" height="60"></canvas>
+        </div>
+
+        <div class="panel-box">
+          <h2>전체 최고점수</h2>
+          <p id="high-score">-</p>
+        </div>
+
         <div class="panel-box keyboard-help">
           <h2>조작 방법</h2>
           <ul class="controls">
-            <li>← → : 좌우 이동</li>
-            <li>↓ : 소프트 드롭</li>
-            <li>↑ : 회전</li>
-            <li>Space : 하드 드롭</li>
+            <li><span class="key">← →</span> : 좌우 이동</li>
+            <li><span class="key">↓</span> : 소프트 드롭</li>
+            <li><span class="key">↑</span> : 회전</li>
+            <li><span class="key">Space</span> : 하드 드롭</li>
           </ul>
         </div>
       </div>
@@ -45,9 +55,9 @@
     <div id="touch-controls" class="touch-controls">
       <div class="touch-dpad">
         <button id="btn-rotate" class="touch-btn dpad-up" aria-label="회전" type="button">↑</button>
-        <button id="btn-left" class="touch-btn dpad-left" aria-label="왼쪽 이동" type="button">◀</button>
-        <button id="btn-down" class="touch-btn dpad-down" aria-label="소프트 드롭" type="button">▽</button>
-        <button id="btn-right" class="touch-btn dpad-right" aria-label="오른쪽 이동" type="button">▶</button>
+        <button id="btn-left" class="touch-btn dpad-left" aria-label="왼쪽 이동" type="button">←</button>
+        <button id="btn-down" class="touch-btn dpad-down" aria-label="소프트 드롭" type="button">↓</button>
+        <button id="btn-right" class="touch-btn dpad-right" aria-label="오른쪽 이동" type="button">→</button>
       </div>
       <button id="btn-drop" class="touch-btn wide" aria-label="하드 드롭" type="button">DROP (Space)</button>
     </div>

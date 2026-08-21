@@ -9,6 +9,10 @@
   const levelEl = document.getElementById('level');
   const overlay = document.getElementById('game-over-overlay');
   const restartBtn = document.getElementById('restart-btn');
+  const highScoreEl = document.getElementById('high-score');
+  const nextCanvas = document.getElementById('next-board');
+  const nextCtx = nextCanvas.getContext('2d');
+  const NEXT_CELL = 20;
   const boardWrapper = document.querySelector('.board-wrapper');
   const touchLayoutQuery = window.matchMedia('(pointer: coarse)');
 
@@ -69,16 +73,47 @@
   const MIN_DROP_INTERVAL = 100;
   const SPEED_STEP_PER_LEVEL = 70;
   const LEVEL_UP_INTERVAL = 30000;
+  const HIGH_SCORE_KEY = 'tetris-high-score';
 
   let board = createEmptyBoard();
   let current = null;
+  let nextType = randomPieceType();
   let score = 0;
   let level = 1;
+  let highScore = null;
   let dropTimer = 0;
   let levelTimer = 0;
   let lastTime = 0;
   let gameOver = false;
   let rafId = null;
+
+  // best score ever recorded in this browser, across all play sessions;
+  // wrapped in try/catch since localStorage can throw (privacy mode, etc.)
+  function loadHighScore() {
+    try {
+      const stored = localStorage.getItem(HIGH_SCORE_KEY);
+      const parsed = stored === null ? NaN : parseInt(stored, 10);
+      return Number.isFinite(parsed) ? parsed : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function renderHighScore() {
+    highScoreEl.textContent = highScore === null ? '-' : highScore;
+  }
+
+  function maybeUpdateHighScore() {
+    if (highScore === null || score > highScore) {
+      highScore = score;
+      renderHighScore();
+      try {
+        localStorage.setItem(HIGH_SCORE_KEY, String(highScore));
+      } catch (e) {
+        // ignore (e.g. privacy mode / storage disabled)
+      }
+    }
+  }
 
   function currentDropInterval() {
     return Math.max(MIN_DROP_INTERVAL, BASE_DROP_INTERVAL - (level - 1) * SPEED_STEP_PER_LEVEL);
@@ -142,14 +177,33 @@
     if (cleared > 0) {
       score += cleared * 100;
       scoreEl.textContent = score;
+      maybeUpdateHighScore();
     }
   }
 
   function spawnPiece() {
-    current = createPiece(randomPieceType());
+    current = createPiece(nextType);
+    nextType = randomPieceType();
+    renderNextPreview();
     if (!isValidPosition(current)) {
       endGame();
     }
+  }
+
+  function renderNextPreview() {
+    nextCtx.fillStyle = '#0f0f1a';
+    nextCtx.fillRect(0, 0, nextCanvas.width, nextCanvas.height);
+
+    const cells = SHAPES[nextType];
+    const shapeW = (Math.max(...cells.map(([x]) => x)) + 1) * NEXT_CELL;
+    const shapeH = (Math.max(...cells.map(([, y]) => y)) + 1) * NEXT_CELL;
+    const offsetX = (nextCanvas.width - shapeW) / 2;
+    const offsetY = (nextCanvas.height - shapeH) / 2;
+
+    nextCtx.fillStyle = COLORS[nextType];
+    cells.forEach(([x, y]) => {
+      nextCtx.fillRect(offsetX + x * NEXT_CELL, offsetY + y * NEXT_CELL, NEXT_CELL - 1, NEXT_CELL - 1);
+    });
   }
 
   function endGame() {
@@ -317,6 +371,9 @@
 
   window.addEventListener('resize', fitBoardToViewport);
   window.addEventListener('orientationchange', fitBoardToViewport);
+
+  highScore = loadHighScore();
+  renderHighScore();
 
   fitBoardToViewport();
   startGame();
