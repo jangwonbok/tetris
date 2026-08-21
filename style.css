@@ -121,6 +121,49 @@ h1 {
   text-align: left;
 }
 
+.touch-controls {
+  display: none;
+  flex-direction: column;
+  gap: 10px;
+  margin: 20px auto 0;
+  width: min(300px, 92vw);
+}
+
+.touch-row {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.touch-btn {
+  flex: 1;
+  padding: 16px 0;
+  font-size: 20px;
+  border: none;
+  border-radius: 8px;
+  background: #4a4a6a;
+  color: #f1f1f1;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+.touch-btn:active {
+  background: #5f5f8a;
+}
+
+.touch-btn.wide {
+  flex: 2;
+  font-size: 15px;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+@media (pointer: coarse) {
+  .touch-controls {
+    display: flex;
+  }
+}
+
 @media (max-width: 480px) {
   h1 {
     font-size: 22px;

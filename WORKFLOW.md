@@ -128,3 +128,43 @@ src/exercise/jangwonbok/day02/tetris 밑에 AGENT.md 파일을 만들어줘. 내
 - 절차: (0) SSH 인증 확인 → (1) GitHub 빈 저장소 생성 → (2) 모노레포에 `tetris` 원격 추가 → (3) `git subtree push`로 최초 배포 → (4) Settings > Pages에서 main/root 활성화 → (5) 접속 확인 → (6) 이후 파일 수정 후 커밋 + 동일한 `git subtree push` 재실행 (원격에 반영 안 된 변경이 있으면 `git subtree pull`로 먼저 merge — rebase 금지, AGENT.md 규칙과 동일)
 - subtree push 시 폴더 내 모든 파일(`AGENT.md`/`WORKFLOW.md`/`PLAN.md`/`DEPLOY.md` 포함)이 그대로 새 저장소에 올라감을 안내
 - GitHub Pages가 Jekyll 빌드를 건너뛰도록 `tetris/.nojekyll` 빈 파일 추가 (subtree push에 함께 포함되도록)
+
+---
+
+## 8. GitHub Pages 실제 배포 진행
+
+### 프롬프트 (원본)
+
+```
+DEPLOY.md  파일 참고해서 배포해줘
+```
+
+(이어서 저장소 생성 여부 확인 질문에 사용자가 "아직 안 만들었음"으로 응답 → 사용자가 직접 https://github.com/jangwonbok/tetris.git 저장소를 생성 후 URL 공유)
+
+### 결과 (요약)
+
+- `gh` CLI 미설치·API 토큰 없음을 확인 → 저장소 생성/Pages 설정 화면(웹 UI 로그인 필요)은 사용자가 직접 진행하도록 안내
+- 모노레포에 `src/exercise/jangwonbok/day02/tetris/`가 아직 커밋되지 않은 상태(untracked)였음을 확인, 해당 폴더만 로컬 커밋(원격 `origin`에는 push 안 함)
+- `git remote add tetris git@github.com:jangwonbok/tetris.git` 추가
+- `git subtree push --prefix=src/exercise/jangwonbok/day02/tetris tetris main` 실행 → `jangwonbok/tetris` 저장소의 `main` 브랜치로 정상 push 완료 (`git ls-remote`로 확인)
+- 남은 GitHub Pages 활성화(Settings → Pages → Deploy from a branch, main/root)는 웹 UI 작업이라 사용자가 직접 진행하도록 단계 안내
+
+---
+
+## 9. 모바일 터치 조작 추가
+
+### 프롬프트 (원본)
+
+```
+모바일에서 사용가능하도록 할수있어?
+```
+
+(위 질문에 터치 버튼 추가 방식을 제안하고 진행 여부를 물었고, 사용자가 이어서 "만들어줘"로 승인)
+
+### 결과 (요약)
+
+- `index.html` — 보드 하단에 `#touch-controls` 영역 추가: ◀/⟳/▶, ▽/DROP 버튼 (좌우 이동, 회전, 소프트 드롭, 하드 드롭)
+- `style.css` — `.touch-controls`/`.touch-btn` 스타일 추가, 기본은 숨김 처리하고 `@media (pointer: coarse)`(터치 기기)에서만 표시되도록 구성
+- `script.js` — 각 버튼에 클릭 이벤트 연결, 기존 `tryMove`/`tryRotate`/`softDrop`/`hardDrop` 함수를 재사용하는 `handleTouchAction` 헬퍼로 게임오버 가드 및 렌더링 처리 (키보드 핸들러와 동일한 패턴)
+- jsdom 기반 헤드리스 테스트로 5개 버튼 모두 존재 확인 및 클릭 시 예외 없이 동작함을 검증
+- `README.md`에 터치 버튼 안내 추가, 조작 방법 표에 키보드/터치 버튼 매핑 정리

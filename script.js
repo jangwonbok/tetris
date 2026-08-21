@@ -268,6 +268,18 @@
     rafId = requestAnimationFrame(loop);
   }
 
+  function handleTouchAction(action) {
+    if (gameOver) return;
+    action();
+    render();
+  }
+
+  document.getElementById('btn-left').addEventListener('click', () => handleTouchAction(() => tryMove(-1, 0)));
+  document.getElementById('btn-right').addEventListener('click', () => handleTouchAction(() => tryMove(1, 0)));
+  document.getElementById('btn-rotate').addEventListener('click', () => handleTouchAction(tryRotate));
+  document.getElementById('btn-down').addEventListener('click', () => handleTouchAction(softDrop));
+  document.getElementById('btn-drop').addEventListener('click', () => handleTouchAction(hardDrop));
+
   document.addEventListener('keydown', handleKeydown);
   restartBtn.addEventListener('click', startGame);
 
