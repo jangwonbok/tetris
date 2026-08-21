@@ -82,7 +82,7 @@ h1 {
 
 #board {
   background: var(--md-surface);
-  border: none;
+  border: 2px solid rgba(255, 255, 255, 0.16);
   border-radius: 4px;
   box-shadow: var(--md-elevation-4);
   display: block;
@@ -207,8 +207,8 @@ h1 {
 /* floats directly over the bottom of the board (nested inside
    .board-wrapper, which is position:relative) instead of occupying its
    own row — translucent buttons "hover" over the gameplay area.
-   Two clusters spread to opposite corners: rotate buttons bottom-left,
-   direction cross bottom-right. */
+   Two groups spread to opposite corners: DROP + rotate buttons at the
+   left, the left/right/down direction pad at the right. */
 .touch-controls {
   display: none;
   flex-direction: row;
@@ -216,32 +216,34 @@ h1 {
   justify-content: space-between;
 }
 
+.left-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .rotate-buttons {
   display: flex;
   gap: 10px;
 }
 
-/* cross/plus-shaped d-pad (up/left/right/down around an empty hub) */
+/* left/right/down around an empty hub — no "up" since hard drop lives
+   in the standalone DROP button on the left instead */
 .touch-dpad {
   display: grid;
   grid-template-columns: repeat(3, 56px);
-  grid-template-rows: repeat(3, 56px);
+  grid-template-rows: repeat(2, 56px);
   gap: 4px;
-}
-
-.dpad-up {
-  grid-column: 2;
-  grid-row: 1;
 }
 
 .dpad-left {
   grid-column: 1;
-  grid-row: 2;
+  grid-row: 1;
 }
 
 .dpad-hub {
   grid-column: 2;
-  grid-row: 2;
+  grid-row: 1;
   align-self: center;
   justify-self: center;
   width: 10px;
@@ -252,12 +254,12 @@ h1 {
 
 .dpad-right {
   grid-column: 3;
-  grid-row: 2;
+  grid-row: 1;
 }
 
 .dpad-down {
   grid-column: 2;
-  grid-row: 3;
+  grid-row: 2;
 }
 
 .touch-btn {
@@ -287,6 +289,14 @@ h1 {
   /* rotate buttons: slightly smaller circular pair */
   min-height: 52px;
   font-size: 22px;
+}
+
+.touch-btn.drop-btn {
+  /* standalone hard-drop button, same circular size as the rotate pair
+     but with a short text label instead of a symbol */
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
 }
 
 .touch-btn.square {
