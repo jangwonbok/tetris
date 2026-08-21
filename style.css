@@ -331,6 +331,7 @@ h1 {
   html,
   body {
     height: 100dvh;
+    overflow-x: hidden;
     overflow-y: auto;
   }
 
@@ -419,12 +420,13 @@ h1 {
      unreliable because board-wrapper's own box also depends on the
      canvas's size, so the two can't safely be resolved by CSS alone */
 
-  /* floats over the bottom of the board itself (board-wrapper is
-     position:relative) instead of taking its own row, so the board gets
-     the full available height and the controls just hover on top of it */
+  /* fixed to the viewport (not board-wrapper) so the two clusters pin to
+     the actual screen edges — a narrow board-wrapper used to constrain
+     their combined width and push them past its right edge, which grew
+     the page horizontally and caused a horizontal scrollbar */
   .touch-controls {
     display: flex;
-    position: absolute;
+    position: fixed;
     left: 0;
     right: 0;
     bottom: 10px;

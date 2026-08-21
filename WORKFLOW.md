@@ -567,3 +567,21 @@ drop버튼 폰트는 줄이고 안에 여백이 있게해주고
   - `.touch-btn` 기본 규칙을 `padding`/`line-height` 기반 중앙정렬에서 `display:flex; align-items:center; justify-content:center;` 기반으로 변경 (아이콘이 버튼 크기와 무관하게 항상 중앙에 위치)
   - `.touch-btn.round`(회전 버튼)에 **`width: 58px; height: 58px;`**를 동일하게 지정해 진짜 원이 되도록 하고, 아이콘 크기를 22px→26px로 키움(요청대로 "아이콘 조금 키워주고"), 버튼 자체 크기도 여유를 둬 아이콘 주변 여백 확보
   - `.touch-btn.drop-btn`은 원이 아닌 **알약(pill) 모양**으로 재정의: `width:76px; height:52px; border-radius:26px; padding:0 10px;`, 폰트는 13px→12px로 축소 — 텍스트 주변에 실제 여백이 생기도록 폭을 명시적으로 확보
+
+---
+
+## 30. 가로 스크롤 수정 — 조작키를 화면 기준 좌/우 끝에 고정
+
+### 프롬프트 (원본)
+
+```
+가로스크롤이 생기는데 방향키가 영역 밖으로 나가면서 
+드롭다운버튼 회전버튼은 제일 끝 왼쪽에 붙여주고
+방향키 버튼은 제일 오른쪽 위치에 넣어줘
+```
+
+### 결과 (요약)
+
+- 원인: `#touch-controls`가 `position:absolute`로 **`.board-wrapper` 기준**(좁을 수 있는 보드 폭)에 맞춰 배치되고 있었는데, DROP+회전 버튼 그룹과 방향키 그리드의 합산 폭이 보드 폭보다 넓은 기기에서는 `justify-content:space-between`으로 벌어진 내용이 `.board-wrapper` 오른쪽 경계를 넘어갔고, 이 오버플로가 body까지 전달되어 페이지 전체에 가로 스크롤이 생겼음
+- `style.css` — `.touch-controls`를 `position:absolute`(board-wrapper 기준)에서 **`position:fixed`(뷰포트 기준)**로 변경 — `left:0; right:0`이 이제 화면 자체의 좌우 끝을 의미하게 되어, DROP+회전 버튼 그룹은 화면 맨 왼쪽에, 방향키 그리드는 화면 맨 오른쪽에 고정됨. `position:fixed`는 일반 흐름에서 빠지므로 내부 콘텐츠가 넘쳐도 페이지 자체의 스크롤 영역에는 영향을 주지 않아 가로 스크롤 문제도 근본적으로 해결됨
+- 안전장치로 `html, body`에 `overflow-x: hidden` 추가
