@@ -10,6 +10,8 @@
   const overlay = document.getElementById('game-over-overlay');
   const restartBtn = document.getElementById('restart-btn');
   const restartAnytimeBtn = document.getElementById('restart-anytime-btn');
+  const muteBtn = document.getElementById('mute-btn');
+  const muteIcon = document.getElementById('mute-icon');
   const highScoreEl = document.getElementById('high-score');
   const nextCanvas = document.getElementById('next-board');
   const nextCtx = nextCanvas.getContext('2d');
@@ -75,6 +77,20 @@
   const SPEED_STEP_PER_LEVEL = 70;
   const LEVEL_UP_INTERVAL = 30000;
   const HIGH_SCORE_KEY = 'tetris-high-score';
+  const MUTED_KEY = 'tetris-muted';
+  const BGM_VOLUME = 0.15;
+  // simple original 8-bit-style loop (no external audio file/network request
+  // needed — synthesized entirely with the Web Audio API)
+  const BGM_NOTES = [
+    { freq: 440.0, dur: 0.2 },
+    { freq: 523.25, dur: 0.2 },
+    { freq: 587.33, dur: 0.2 },
+    { freq: 659.25, dur: 0.4 },
+    { freq: 587.33, dur: 0.2 },
+    { freq: 523.25, dur: 0.2 },
+    { freq: 440.0, dur: 0.4 },
+    { freq: 392.0, dur: 0.4 },
+  ];
 
   let board = createEmptyBoard();
   let current = null;
@@ -87,6 +103,96 @@
   let lastTime = 0;
   let gameOver = false;
   let rafId = null;
+  let muted = loadMuted();
+  let audioCtx = null;
+  let masterGain = null;
+  let bgmTimerId = null;
+  let nextNoteIndex = 0;
+  let nextNoteTime = 0;
+
+  function loadMuted() {
+    try {
+      return localStorage.getItem(MUTED_KEY) === 'true';
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function saveMuted(value) {
+    try {
+      localStorage.setItem(MUTED_KEY, String(value));
+    } catch (e) {
+      // ignore (e.g. privacy mode / storage disabled)
+    }
+  }
+
+  function updateMuteButton() {
+    muteIcon.textContent = muted ? '🔇' : '🔊';
+    muteBtn.setAttribute('aria-label', muted ? '음소거 해제' : '음소거');
+  }
+
+  // browsers block audio until a real user gesture, so the AudioContext is
+  // created lazily on first interaction rather than at page load
+  function ensureAudioContext() {
+    try {
+      if (!audioCtx) {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioCtx();
+        masterGain = audioCtx.createGain();
+        masterGain.gain.value = muted ? 0 : BGM_VOLUME;
+        masterGain.connect(audioCtx.destination);
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    } catch (e) {
+      // Web Audio unsupported — BGM simply won't play
+    }
+  }
+
+  function playNote(freq, startTime, duration) {
+    const osc = audioCtx.createOscillator();
+    const noteGain = audioCtx.createGain();
+    osc.type = 'square';
+    osc.frequency.value = freq;
+    noteGain.gain.setValueAtTime(0, startTime);
+    noteGain.gain.linearRampToValueAtTime(0.5, startTime + 0.01);
+    noteGain.gain.linearRampToValueAtTime(0, startTime + duration);
+    osc.connect(noteGain);
+    noteGain.connect(masterGain);
+    osc.start(startTime);
+    osc.stop(startTime + duration + 0.02);
+  }
+
+  function scheduleBgmNotes() {
+    if (!audioCtx) return;
+    const scheduleAhead = 0.3;
+    while (nextNoteTime < audioCtx.currentTime + scheduleAhead) {
+      const note = BGM_NOTES[nextNoteIndex % BGM_NOTES.length];
+      playNote(note.freq, nextNoteTime, note.dur * 0.9);
+      nextNoteTime += note.dur;
+      nextNoteIndex++;
+    }
+  }
+
+  function startBgm() {
+    if (bgmTimerId) return;
+    ensureAudioContext();
+    if (!audioCtx) return;
+    nextNoteIndex = 0;
+    nextNoteTime = audioCtx.currentTime + 0.1;
+    scheduleBgmNotes();
+    bgmTimerId = setInterval(scheduleBgmNotes, 100);
+  }
+
+  function setMuted(value) {
+    muted = value;
+    saveMuted(muted);
+    if (masterGain) {
+      masterGain.gain.value = muted ? 0 : BGM_VOLUME;
+    }
+    updateMuteButton();
+  }
 
   // best score ever recorded in this browser, across all play sessions;
   // wrapped in try/catch since localStorage can throw (privacy mode, etc.)
@@ -365,11 +471,9 @@
 
   bindPressButton('btn-left', () => tryMove(-1, 0));
   bindPressButton('btn-right', () => tryMove(1, 0));
-  bindPressButton('btn-rotate-ccw', () => tryRotate(-1));
-  bindPressButton('btn-rotate-cw', () => tryRotate(1));
   bindPressButton('btn-down', softDrop);
   bindPressButton('btn-drop', hardDrop);
-  bindPressButton('btn-dpad-up', hardDrop);
+  bindPressButton('btn-dpad-up', () => tryRotate(1));
 
   document.addEventListener('keydown', handleKeydown);
   restartBtn.addEventListener('click', startGame);
@@ -378,8 +482,26 @@
   window.addEventListener('resize', fitBoardToViewport);
   window.addEventListener('orientationchange', fitBoardToViewport);
 
+  muteBtn.addEventListener('click', () => {
+    startBgm();
+    setMuted(!muted);
+  });
+
+  // autoplay is blocked until a real user gesture — start BGM on the first
+  // one (keyboard, click, or touch) and then stop listening
+  function startBgmOnFirstInteraction() {
+    if (!muted) startBgm();
+    document.removeEventListener('keydown', startBgmOnFirstInteraction);
+    document.removeEventListener('click', startBgmOnFirstInteraction);
+    document.removeEventListener('touchstart', startBgmOnFirstInteraction);
+  }
+  document.addEventListener('keydown', startBgmOnFirstInteraction);
+  document.addEventListener('click', startBgmOnFirstInteraction);
+  document.addEventListener('touchstart', startBgmOnFirstInteraction);
+
   highScore = loadHighScore();
   renderHighScore();
+  updateMuteButton();
 
   fitBoardToViewport();
   startGame();

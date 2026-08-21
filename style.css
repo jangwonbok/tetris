@@ -48,22 +48,37 @@ h1 {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
   margin-bottom: 8px;
 }
 
+/* Material "outlined button" look: a filled box instead of plain text,
+   so Home/Restart/Mute read as real buttons */
 .back-link {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 8px;
   font-size: 13px;
+  font-weight: 500;
   color: var(--md-on-surface-medium);
   text-decoration: none;
-  background: none;
-  border: none;
+  background: var(--md-surface);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: var(--md-elevation-1);
   font-family: inherit;
   cursor: pointer;
 }
 
 .back-link:hover {
   color: var(--md-on-surface);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.btn-icon {
+  font-size: 18px;
+  line-height: 1;
 }
 
 .game-area {
@@ -222,11 +237,6 @@ h1 {
   gap: 10px;
 }
 
-.rotate-buttons {
-  display: flex;
-  gap: 10px;
-}
-
 /* full cross (up/left/right/down around a hub) — up mirrors the
    standalone DROP button (also hard drop) so the d-pad still reads as
    a complete cross like the reference image. Track size uses clamp()
@@ -360,7 +370,12 @@ h1 {
   }
 
   .back-link {
+    padding: 5px 8px;
     font-size: 11px;
+  }
+
+  .btn-icon {
+    font-size: 15px;
   }
 
   h1 {
