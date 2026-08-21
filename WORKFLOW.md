@@ -204,3 +204,23 @@ zomm 기능도 막아줘 터치하면 화면이 확대됨
 - `.board-wrapper` 폭 계산에 `40vh` 상한을 추가(`min(300px, 92vw, 40vh)`)해, 세로로 긴 캔버스(가로:세로 1:2)가 화면 높이 대비 과도하게 커져 스크롤이 심해지는 문제를 완화
 - 터치 기기(`pointer: coarse`)에서는 키보드 전용 안내(`조작 방법` 박스, `.keyboard-help`)를 숨기고 `.game-area` 간격과 `h1` 여백을 줄여 세로 공간을 절약
 - `index.html`의 "조작 방법" 패널 박스에 `keyboard-help` 클래스 추가 (숨김 대상 지정용)
+
+---
+
+## 12. 모바일 화면에 정확히 맞추기 (오버플로 제거)
+
+### 프롬프트 (원본)
+
+```
+테트리스 게임화면이 모바일화면에 딱맞게 만들어줘
+영역이 넘쳐나
+```
+
+### 결과 (요약)
+
+- 이전에 적용한 `40vh` 폭 상한 방식은 대략적인 추정치라 기기별로 여전히 넘칠 수 있었음을 확인하고, `@media (pointer: coarse)` 블록을 flexbox 기반 "정확히 한 화면에 맞추기" 구조로 전면 교체
+- `html, body`를 `height: 100dvh`로 고정하고 `.game-container`를 세로 flex 컬럼(`height:100%`)으로 구성: 제목(h1) → `.game-area`(`flex:1`) → 터치 버튼(`.touch-controls`, 이제 `position: static`으로 일반 흐름에 포함) 순서로 배치
+- `.game-area` 내부는 다시 세로 flex(`flex-direction: column`)로 Score/Level 바(`.side-panel`, 가로 배치로 축소)와 보드(`.board-wrapper`, `flex:1`)를 쌓고, 보드는 남는 세로 공간을 모두 차지하도록 함
+- `#board`를 `height:100%; width:auto; max-width:100%`로 바꿔, 폭이 아니라 **남은 높이를 기준으로** 가로:세로 1:2 비율에 맞게 크기가 계산되도록 함 — 세로로 긴 캔버스가 화면 높이를 넘기지 않도록 하는 핵심 수정
+- 터치 버튼을 더 이상 `position: fixed`로 띄우지 않고 flex 컬럼의 마지막 항목으로 배치해, 별도의 `body` 하단 여백 계산(`padding-bottom`)이 필요 없어짐
+- 만약을 위해 `overflow-y: auto`는 유지해 계산이 어긋나는 기기에서도 클리핑 대신 스크롤로 안전하게 대응
