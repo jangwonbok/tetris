@@ -11,7 +11,10 @@
 </head>
 <body>
   <div class="game-container">
-    <a href="index.html" class="back-link">← Home</a>
+    <div class="top-bar">
+      <a href="index.html" class="back-link">← Home</a>
+      <button id="restart-anytime-btn" class="back-link" type="button">⟳ 다시 시작</button>
+    </div>
     <h1>Tetris</h1>
 
     <div class="game-area">
@@ -23,13 +26,18 @@
         </div>
 
         <div id="touch-controls" class="touch-controls">
-          <div class="touch-dpad">
-            <button id="btn-rotate" class="touch-btn dpad-up" aria-label="회전" type="button">↑</button>
-            <button id="btn-left" class="touch-btn dpad-left" aria-label="왼쪽 이동" type="button">←</button>
-            <button id="btn-down" class="touch-btn dpad-down" aria-label="소프트 드롭" type="button">↓</button>
-            <button id="btn-right" class="touch-btn dpad-right" aria-label="오른쪽 이동" type="button">→</button>
+          <div class="rotate-buttons">
+            <button id="btn-rotate-ccw" class="touch-btn round" aria-label="반시계 방향 회전" type="button">⟲</button>
+            <button id="btn-rotate-cw" class="touch-btn round" aria-label="시계 방향 회전" type="button">⟳</button>
           </div>
-          <button id="btn-drop" class="touch-btn wide" aria-label="하드 드롭" type="button">DROP (Space)</button>
+
+          <div class="touch-dpad">
+            <button id="btn-drop" class="touch-btn square dpad-up" aria-label="하드 드롭" type="button">▲</button>
+            <button id="btn-left" class="touch-btn square dpad-left" aria-label="왼쪽 이동" type="button">◀</button>
+            <span class="dpad-hub" aria-hidden="true"></span>
+            <button id="btn-right" class="touch-btn square dpad-right" aria-label="오른쪽 이동" type="button">▶</button>
+            <button id="btn-down" class="touch-btn square dpad-down" aria-label="소프트 드롭" type="button">▼</button>
+          </div>
         </div>
       </div>
 

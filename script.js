@@ -9,6 +9,7 @@
   const levelEl = document.getElementById('level');
   const overlay = document.getElementById('game-over-overlay');
   const restartBtn = document.getElementById('restart-btn');
+  const restartAnytimeBtn = document.getElementById('restart-anytime-btn');
   const highScoreEl = document.getElementById('high-score');
   const nextCanvas = document.getElementById('next-board');
   const nextCtx = nextCanvas.getContext('2d');
@@ -149,9 +150,11 @@
     });
   }
 
-  function rotatePiece(piece) {
+  function rotatePiece(piece, direction) {
     if (piece.type === 'O') return piece;
-    const rotated = piece.cells.map(({ x, y }) => ({ x: -y, y: x }));
+    const rotated = piece.cells.map(({ x, y }) => (
+      direction === -1 ? { x: y, y: -x } : { x: -y, y: x }
+    ));
     const minX = Math.min(...rotated.map((c) => c.x));
     const minY = Math.min(...rotated.map((c) => c.y));
     const normalized = rotated.map((c) => ({ x: c.x - minX, y: c.y - minY }));
@@ -222,9 +225,9 @@
     return false;
   }
 
-  function tryRotate() {
+  function tryRotate(direction = 1) {
     if (gameOver) return;
-    const rotated = rotatePiece(current);
+    const rotated = rotatePiece(current, direction);
     const attempt = { ...rotated, x: current.x, y: current.y };
     if (isValidPosition(attempt)) {
       current = attempt;
@@ -362,12 +365,14 @@
 
   bindPressButton('btn-left', () => tryMove(-1, 0));
   bindPressButton('btn-right', () => tryMove(1, 0));
-  bindPressButton('btn-rotate', tryRotate);
+  bindPressButton('btn-rotate-ccw', () => tryRotate(-1));
+  bindPressButton('btn-rotate-cw', () => tryRotate(1));
   bindPressButton('btn-down', softDrop);
   bindPressButton('btn-drop', hardDrop);
 
   document.addEventListener('keydown', handleKeydown);
   restartBtn.addEventListener('click', startGame);
+  restartAnytimeBtn.addEventListener('click', startGame);
 
   window.addEventListener('resize', fitBoardToViewport);
   window.addEventListener('orientationchange', fitBoardToViewport);
