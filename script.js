@@ -369,6 +369,7 @@
   bindPressButton('btn-rotate-cw', () => tryRotate(1));
   bindPressButton('btn-down', softDrop);
   bindPressButton('btn-drop', hardDrop);
+  bindPressButton('btn-dpad-up', hardDrop);
 
   document.addEventListener('keydown', handleKeydown);
   restartBtn.addEventListener('click', startGame);

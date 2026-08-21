@@ -227,23 +227,29 @@ h1 {
   gap: 10px;
 }
 
-/* left/right/down around an empty hub — no "up" since hard drop lives
-   in the standalone DROP button on the left instead */
+/* full cross (up/left/right/down around a hub) — up mirrors the
+   standalone DROP button (also hard drop) so the d-pad still reads as
+   a complete cross like the reference image */
 .touch-dpad {
   display: grid;
   grid-template-columns: repeat(3, 56px);
-  grid-template-rows: repeat(2, 56px);
+  grid-template-rows: repeat(3, 56px);
   gap: 4px;
+}
+
+.dpad-up {
+  grid-column: 2;
+  grid-row: 1;
 }
 
 .dpad-left {
   grid-column: 1;
-  grid-row: 1;
+  grid-row: 2;
 }
 
 .dpad-hub {
   grid-column: 2;
-  grid-row: 1;
+  grid-row: 2;
   align-self: center;
   justify-self: center;
   width: 10px;
@@ -254,19 +260,24 @@ h1 {
 
 .dpad-right {
   grid-column: 3;
-  grid-row: 1;
+  grid-row: 2;
 }
 
 .dpad-down {
   grid-column: 2;
-  grid-row: 2;
+  grid-row: 3;
 }
 
 .touch-btn {
   /* frosted-glass floating buttons: translucent so the board shows
-     through, with a soft blur and thin highlight border */
-  min-height: 56px;
-  padding: 16px 0;
+     through, with a soft blur and thin highlight border. Centered via
+     flexbox (not padding/line-height) so the glyph stays centered
+     regardless of the button's fixed width/height below — padding
+     alone made width and height mismatch, warping circles into ovals. */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
   font-size: 26px;
   line-height: 1;
   border: 1px solid rgba(255, 255, 255, 0.35);
@@ -286,23 +297,28 @@ h1 {
 }
 
 .touch-btn.round {
-  /* rotate buttons: slightly smaller circular pair */
-  min-height: 52px;
-  font-size: 22px;
+  /* rotate buttons: equal width/height so border-radius:50% forms a
+     true circle, with room around the icon so it doesn't crowd the edge */
+  width: 58px;
+  height: 58px;
+  font-size: 26px;
 }
 
 .touch-btn.drop-btn {
-  /* standalone hard-drop button, same circular size as the rotate pair
-     but with a short text label instead of a symbol */
-  font-size: 13px;
+  /* standalone hard-drop button: a pill (not a circle, since "DROP"
+     is wider than a single icon) with real breathing room around the text */
+  width: 76px;
+  height: 52px;
+  padding: 0 10px;
+  border-radius: 26px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.5px;
 }
 
 .touch-btn.square {
-  /* d-pad direction buttons: rounded square instead of a full circle */
-  min-height: 56px;
-  padding: 0;
+  /* d-pad direction buttons: rounded square instead of a full circle;
+     grid gives these their 56x56 box, so only shape/font need setting */
   font-size: 20px;
   border-radius: 12px;
 }

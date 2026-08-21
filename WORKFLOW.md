@@ -528,3 +528,42 @@ https://jangwonbok.github.io/tetris/ 확인해보면 조작키 자체가 안보�
 ### 결과 (요약)
 
 - 머티리얼 디자인 적용 시(21번 항목) elevation 그림자로 대체하면서 제거했던 보드(`#board`) 테두리를, 옅은 반투명 흰색(`2px solid rgba(255,255,255,0.16)`)으로 다시 추가 — 그림자만으로는 경계가 흐릿해 보일 수 있어 명확한 플레이 영역 경계선을 표시
+
+---
+
+## 28. 십자 방향키의 "위" 방향 복원
+
+### 프롬프트 (원본)
+
+```
+화살표 위에방향이 사라짐
+```
+
+### 결과 (요약)
+
+- 26번 항목에서 DROP을 왼쪽 단독 버튼으로 분리하면서 십자 방향키의 "위" 자리를 아예 없앴는데, 사용자가 이를 사라진 것으로 인지 — 처음 참고 이미지의 완전한 십자(상/좌/우/하) 형태를 유지하길 원하는 것으로 판단해 복원
+- `game.html` — `.touch-dpad`에 `btn-dpad-up`(▲) 버튼을 다시 추가 (기존 왼쪽의 `btn-drop`과는 별개의 새 id, 같은 하드 드롭 기능을 공유)
+- `style.css` — `.touch-dpad` 그리드를 3×2에서 다시 3×3(십자)로 복원, `.dpad-up` 규칙 재추가
+- `script.js` — `bindPressButton('btn-dpad-up', hardDrop)` 추가 — 왼쪽 단독 DROP 버튼과 오른쪽 십자의 위 버튼이 둘 다 하드 드롭을 실행(중복 조작 경로, 어느 쪽을 눌러도 동일 동작)
+- 헤드리스 테스트로 버튼 7개(`btn-left`/`btn-right`/`btn-down`/`btn-drop`/`btn-dpad-up`/`btn-rotate-ccw`/`btn-rotate-cw`) 모두 중복 없이 존재하고 클릭 시 예외 없이 동작함을 확인
+- `README.md` 조작 방법 표에 "위 방향키도 하드 드롭" 설명 추가
+
+---
+
+## 29. DROP·회전 버튼 모양 깨짐 수정
+
+### 프롬프트 (원본)
+
+```
+drop버튼 회전버튼 꺠져보임 
+drop버튼 폰트는 줄이고 안에 여백이 있게해주고
+회전버튼은 아이콘 조금 키워주고 여백도 있게 그리고 widthh height도 동일하게
+```
+
+### 결과 (요약)
+
+- 원인: `.touch-btn`이 `min-height`만 지정하고 **너비(width)는 지정하지 않아**, flex 컨테이너(`.left-controls`/`.rotate-buttons`) 안에서 버튼 너비가 내용(텍스트/아이콘)에 따라 제각각으로 결정됨 → `border-radius:50%`가 정사각형이 아닌 박스에 적용되면서 타원/찌그러진 모양으로 보였던 것 (특히 "DROP" 4글자 텍스트는 폭이 훨씬 넓어져 찌그러짐이 심했음). 반면 방향키(`.square`)는 CSS Grid 트랙이 56×56으로 강제 고정해줘서 문제가 없었음
+- `style.css`:
+  - `.touch-btn` 기본 규칙을 `padding`/`line-height` 기반 중앙정렬에서 `display:flex; align-items:center; justify-content:center;` 기반으로 변경 (아이콘이 버튼 크기와 무관하게 항상 중앙에 위치)
+  - `.touch-btn.round`(회전 버튼)에 **`width: 58px; height: 58px;`**를 동일하게 지정해 진짜 원이 되도록 하고, 아이콘 크기를 22px→26px로 키움(요청대로 "아이콘 조금 키워주고"), 버튼 자체 크기도 여유를 둬 아이콘 주변 여백 확보
+  - `.touch-btn.drop-btn`은 원이 아닌 **알약(pill) 모양**으로 재정의: `width:76px; height:52px; border-radius:26px; padding:0 10px;`, 폰트는 13px→12px로 축소 — 텍스트 주변에 실제 여백이 생기도록 폭을 명시적으로 확보
