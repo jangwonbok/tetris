@@ -262,3 +262,24 @@ zomm 기능도 막아줘 터치하면 화면이 확대됨
 - 하드 드롭(Space 대응) 버튼은 물리 키보드의 스페이스바처럼 방향키 클러스터 아래에 전체 폭으로 분리 배치, 라벨을 `DROP (Space)`로 명확화
 - `style.css` — `.touch-row`(flex) 방식을 제거하고 `.touch-dpad`를 3열×2행 CSS Grid로 구성, `grid-column`/`grid-row`로 각 버튼을 정확한 위치(위/왼쪽/아래/오른쪽)에 배치
 - 버튼 `id`는 그대로 유지(`btn-left`/`btn-right`/`btn-rotate`/`btn-down`/`btn-drop`)해 `script.js`는 수정 없이 그대로 동작
+
+---
+
+## 15. 방향키 배치/버튼 크기 재수정 및 Score/Level 왼쪽 배치
+
+### 프롬프트 (원본)
+
+```
+방향키 위치랑 달라 다시확인해서 구현해줘
+끄리고 버튼크기가 작아서 깨져보임
+스코어랑 레벨은 왼쪽에 위치하도록 만들어줘
+```
+
+### 결과 (요약)
+
+- 방향키 배치 재검토: 이전 `.touch-dpad`가 `1fr` 컬럼으로 `.touch-controls` 전체 폭(최대 300px)에 늘어나 있어 버튼 3개가 넓게 흩어진 한 줄처럼 보였던 것이 원인으로 판단 — 실제 키보드 화살표 클러스터처럼 촘촘하게 붙은 모양이 아니었음
+- `.touch-dpad`를 `1fr` 대신 **고정 크기**(64px×64px, gap 6px) 그리드로 변경하고 `justify-content: center`로 가운데 정렬 → 물리 키보드 화살표 클러스터처럼 좁고 조밀한 3×2 블록으로 변경
+- `.touch-btn`에 `min-height: 56px`, `font-size: 26px`로 크기를 확실히 키워 "버튼이 작아 깨져 보임" 문제 대응
+- DROP 버튼(`.touch-btn.wide`)도 dpad와 폭이 맞도록 `width: 204px`(dpad 전체 폭과 동일)로 고정, 두 클러스터가 시각적으로 정렬되도록 함
+- Score/Level을 화면 왼쪽으로 이동: `@media (pointer: coarse)`에서 `.game-area`를 세로(column)에서 **가로(row)** 배치로 바꾸고, `.side-panel`에 `order: -1`을 줘 DOM 순서(보드 다음 패널) 변경 없이 시각적으로 왼쪽에 오도록 처리. 폭은 78px 슬림 컬럼으로 축소
+- `.board-wrapper`는 이제 가로 배치의 남은 공간을 차지(`flex:1`)하며, `script.js`의 `fitBoardToViewport()`가 실제 렌더링된 폭/높이를 그대로 측정하므로 별도 JS 수정 없이 새 레이아웃에 맞게 자동으로 재계산됨

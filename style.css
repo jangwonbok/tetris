@@ -128,6 +128,7 @@ h1 {
 .touch-controls {
   display: none;
   flex-direction: column;
+  align-items: center;
   gap: 10px;
   width: min(300px, 92vw);
   position: fixed;
@@ -140,13 +141,16 @@ h1 {
   z-index: 10;
 }
 
-/* mirrors a physical keyboard's arrow-key cluster: rotate (↑) on top,
-   left/soft-drop(↓)/right on the bottom row */
+/* mirrors a physical keyboard's arrow-key cluster: a tight, fixed-size
+   3x2 block (rotate on top, left/soft-drop/right on the bottom row) —
+   not stretched across the full width, so it reads as one compact
+   cluster instead of three separate wide buttons */
 .touch-dpad {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(2, 1fr);
-  gap: 8px;
+  grid-template-columns: repeat(3, 64px);
+  grid-template-rows: repeat(2, 64px);
+  gap: 6px;
+  justify-content: center;
 }
 
 .dpad-up {
@@ -170,8 +174,10 @@ h1 {
 }
 
 .touch-btn {
+  min-height: 56px;
   padding: 16px 0;
-  font-size: 20px;
+  font-size: 26px;
+  line-height: 1;
   border: none;
   border-radius: 8px;
   background: #4a4a6a;
@@ -185,8 +191,12 @@ h1 {
 }
 
 .touch-btn.wide {
-  width: 100%;
-  font-size: 15px;
+  /* matches the d-pad's total width (3 * 64px + 2 * 6px gap) so the two
+     control clusters line up visually instead of the drop button looking
+     stretched wider than the arrow cluster above it */
+  width: 204px;
+  min-height: 48px;
+  font-size: 16px;
   font-weight: bold;
   letter-spacing: 1px;
 }
@@ -226,32 +236,37 @@ h1 {
     flex: 1;
     min-height: 0;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     flex-wrap: nowrap;
-    align-items: center;
+    align-items: stretch;
+    justify-content: center;
     gap: 8px;
   }
 
+  /* score/level sit in a slim column to the left of the board */
   .side-panel {
+    order: -1;
     flex: none;
-    flex-direction: row;
-    width: auto;
+    flex-direction: column;
+    justify-content: center;
+    width: 78px;
     min-width: 0;
     gap: 8px;
   }
 
   .panel-box {
-    padding: 6px 12px;
+    padding: 8px 6px;
+    text-align: center;
   }
 
   .panel-box h2 {
-    font-size: 11px;
+    font-size: 10px;
     margin: 0 0 2px;
   }
 
   #score,
   #level {
-    font-size: 18px;
+    font-size: 17px;
   }
 
   .keyboard-help {
@@ -261,7 +276,7 @@ h1 {
   .board-wrapper {
     flex: 1;
     min-height: 0;
-    width: 100%;
+    width: auto;
     display: flex;
     align-items: center;
     justify-content: center;
