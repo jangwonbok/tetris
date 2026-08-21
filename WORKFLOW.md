@@ -185,3 +185,22 @@ DEPLOY.md  파일 참고해서 배포해줘
 - `style.css` — `.touch-controls`를 `position: fixed; bottom: 0`으로 화면 하단에 고정, 반투명 배경·구분선 추가, iOS 홈 인디케이터 영역은 `env(safe-area-inset-bottom)`으로 여백 확보
 - 터치 기기(`pointer: coarse`)에서는 고정 버튼이 콘텐츠를 가리지 않도록 `body`에 하단 여백(`padding-bottom: 180px`) 추가
 - 헤드리스 테스트로 click 경로(데스크톱 마우스 시뮬레이션)가 여전히 정상 동작함을 재확인
+
+---
+
+## 11. 모바일 사이즈 최적화 및 확대(zoom) 방지
+
+### 프롬프트 (원본)
+
+```
+모바일 사이즈에 맞게 만들어줘 
+zomm 기능도 막아줘 터치하면 화면이 확대됨
+```
+
+### 결과 (요약)
+
+- `index.html` — `viewport` 메타 태그에 `maximum-scale=1.0, user-scalable=no` 추가해 핀치/더블탭 확대를 전역적으로 차단
+- `style.css` — `html`에 `touch-action: manipulation` 추가(더블탭 확대 억제 보강)
+- `.board-wrapper` 폭 계산에 `40vh` 상한을 추가(`min(300px, 92vw, 40vh)`)해, 세로로 긴 캔버스(가로:세로 1:2)가 화면 높이 대비 과도하게 커져 스크롤이 심해지는 문제를 완화
+- 터치 기기(`pointer: coarse`)에서는 키보드 전용 안내(`조작 방법` 박스, `.keyboard-help`)를 숨기고 `.game-area` 간격과 `h1` 여백을 줄여 세로 공간을 절약
+- `index.html`의 "조작 방법" 패널 박스에 `keyboard-help` 클래스 추가 (숨김 대상 지정용)
