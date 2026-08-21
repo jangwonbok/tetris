@@ -168,3 +168,20 @@ DEPLOY.md  파일 참고해서 배포해줘
 - `script.js` — 각 버튼에 클릭 이벤트 연결, 기존 `tryMove`/`tryRotate`/`softDrop`/`hardDrop` 함수를 재사용하는 `handleTouchAction` 헬퍼로 게임오버 가드 및 렌더링 처리 (키보드 핸들러와 동일한 패턴)
 - jsdom 기반 헤드리스 테스트로 5개 버튼 모두 존재 확인 및 클릭 시 예외 없이 동작함을 검증
 - `README.md`에 터치 버튼 안내 추가, 조작 방법 표에 키보드/터치 버튼 매핑 정리
+
+---
+
+## 10. 터치 버튼 반응성 개선 및 하단 고정
+
+### 프롬프트 (원본)
+
+```
+방향키가 동작을 안하고 방향키를 하단에 고정시켜줘
+```
+
+### 결과 (요약)
+
+- `script.js` — 버튼 클릭만으로는 실제 터치 기기에서 손가락이 살짝 움직이면 `click`이 취소되어 반응이 늦거나 안 되는 문제가 있을 수 있어, `touchstart`(즉시 반응 + `preventDefault`로 뒤이은 중복 `click` 억제)와 `click`(마우스 환경 대응)을 함께 바인딩하는 `bindPressButton` 헬퍼로 교체
+- `style.css` — `.touch-controls`를 `position: fixed; bottom: 0`으로 화면 하단에 고정, 반투명 배경·구분선 추가, iOS 홈 인디케이터 영역은 `env(safe-area-inset-bottom)`으로 여백 확보
+- 터치 기기(`pointer: coarse`)에서는 고정 버튼이 콘텐츠를 가리지 않도록 `body`에 하단 여백(`padding-bottom: 180px`) 추가
+- 헤드리스 테스트로 click 경로(데스크톱 마우스 시뮬레이션)가 여전히 정상 동작함을 재확인

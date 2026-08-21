@@ -274,11 +274,23 @@
     render();
   }
 
-  document.getElementById('btn-left').addEventListener('click', () => handleTouchAction(() => tryMove(-1, 0)));
-  document.getElementById('btn-right').addEventListener('click', () => handleTouchAction(() => tryMove(1, 0)));
-  document.getElementById('btn-rotate').addEventListener('click', () => handleTouchAction(tryRotate));
-  document.getElementById('btn-down').addEventListener('click', () => handleTouchAction(softDrop));
-  document.getElementById('btn-drop').addEventListener('click', () => handleTouchAction(hardDrop));
+  function bindPressButton(id, action) {
+    const el = document.getElementById(id);
+    const trigger = (e) => {
+      e.preventDefault();
+      handleTouchAction(action);
+    };
+    // touchstart fires immediately and, via preventDefault, suppresses the
+    // trailing synthetic click so the action doesn't fire twice on touch devices
+    el.addEventListener('touchstart', trigger, { passive: false });
+    el.addEventListener('click', trigger);
+  }
+
+  bindPressButton('btn-left', () => tryMove(-1, 0));
+  bindPressButton('btn-right', () => tryMove(1, 0));
+  bindPressButton('btn-rotate', tryRotate);
+  bindPressButton('btn-down', softDrop);
+  bindPressButton('btn-drop', hardDrop);
 
   document.addEventListener('keydown', handleKeydown);
   restartBtn.addEventListener('click', startGame);
